@@ -1,0 +1,14 @@
+# The raw IEM archive. Rebuildable with 01_refresh_data.R, ~16 MB of binary
+# shapefiles that would grow with every refresh, and not needed to run the app —
+# frw.rds is. Keeping it out is what makes a public repo reasonable.
+raw_warning_text_files/
+misc_warning_shape_files/
+
+# R
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+rsconnect/
+
+.DS_Store
