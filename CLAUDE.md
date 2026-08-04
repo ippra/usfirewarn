@@ -9,10 +9,15 @@ they exist. Source is the Iowa Environmental Mesonet (IEM). R / tidyverse / sf.
 |---|---|
 | `00_run_pipeline.R` | Sources the other two in order. The normal entry point. |
 | `01_refresh_data.R` | Tops up the local archive from IEM. **Incremental** — asks only for the window not already on disk. |
-| `02_build_archive.R` | Reads the local archive and builds `frw`. Never touches the network. |
+| `02_build_archive.R` | Reads the local archive, builds `frw`, writes `frw.rds`. Never touches the network. |
+| `app.R` | Shiny browser for the archive. Reads `frw.rds`. |
 
 They stay separate on purpose: the build reads only what is on disk, so a rebuild is
-reproducible and works offline. Both still run standalone.
+reproducible and works offline. Each still runs standalone.
+
+All paths are relative to the working directory, so the folder can be moved or shared.
+Start R in the archive folder. The app must stay named `app.R` — `rsconnect` normalizes
+the Shiny entrypoint to that name, and Connect Cloud will not find it under any other.
 
 ## Refresh is incremental
 
@@ -58,6 +63,31 @@ Geography comes from the polygon, not from parsing UGC codes. Only the raw
 `ugc_header`, `ugc_state`, and `ugc_type` are kept. The C/Z mix inverts over time —
 pre-2020 is mostly county codes, 2020+ mostly zone codes — so the 412 warnings
 without polygons have no usable geometry unless UGC parsing is added later.
+
+## Deployment (Posit Connect Cloud)
+
+Connect Cloud publishes from a **public** GitHub repo and reads `manifest.json` for the
+R version and packages. It does not support `renv`.
+
+`.gitignore` keeps `raw_warning_text_files/` and `misc_warning_shape_files/` out of the
+repo — 16 MB of binary shapefiles that grow with every refresh and that the app does
+not need. `frw.rds` (~90 KB) is committed instead, which is why the deployed bundle is
+~100 KB.
+
+The app prefers `frw.rds` and only falls back to sourcing `02_build_archive.R` when the
+cache is missing, so `tidyverse` and `skimr` stay out of the deployment. Keep it that
+way: importing `tidyverse` in `app.R` would pull ~100 packages into `manifest.json`.
+
+**After any refresh, rebuild and recommit `frw.rds`, then regenerate the manifest if
+package versions moved:**
+
+```r
+source("00_run_pipeline.R")                                   # refresh + rebuild cache
+rsconnect::writeManifest(appFiles = c("app.R", "frw.rds"))     # only if deps changed
+```
+
+Then push — Connect Cloud redeploys on push. The `appFiles` argument is load-bearing:
+without it the manifest picks up the pipeline scripts' dependencies too.
 
 ## Conventions
 
