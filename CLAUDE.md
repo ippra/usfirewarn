@@ -66,28 +66,32 @@ without polygons have no usable geometry unless UGC parsing is added later.
 
 ## Deployment (Posit Connect Cloud)
 
-Connect Cloud publishes from a **public** GitHub repo and reads `manifest.json` for the
-R version and packages. It does not support `renv`.
+Deployed with the **Posit Publisher** extension, which uploads directly from this
+folder. No git and no GitHub repo involved — the public-repo requirement in Posit's
+docs applies only to the git-backed publishing flow, which this project does not use.
+`manifest.json` likewise belongs to that flow and is not what Publisher reads.
 
-`.gitignore` keeps `raw_warning_text_files/` and `misc_warning_shape_files/` out of the
-repo — 16 MB of binary shapefiles that grow with every refresh and that the app does
-not need. `frw.rds` (~90 KB) is committed instead, which is why the deployed bundle is
-~100 KB.
+Config lives in `.posit/publish/`. The file list there is the deployment, not
+`.gitignore`. Redeploy is the extension's "Deploy Your Project" button.
 
-The app prefers `frw.rds` and only falls back to sourcing `02_build_archive.R` when the
-cache is missing, so `tidyverse` and `skimr` stay out of the deployment. Keep it that
-way: importing `tidyverse` in `app.R` would pull ~100 packages into `manifest.json`.
+`frw.rds` (~90 KB) is what the app reads; `raw_warning_text_files/` and
+`misc_warning_shape_files/` (16 MB) are deliberately not deployed. `app.R` prefers the
+cache and only falls back to sourcing `02_build_archive.R` when it is missing, which is
+why the app imports `dplyr`/`stringr` rather than `tidyverse`.
 
-**After any refresh, rebuild and recommit `frw.rds`, then regenerate the manifest if
-package versions moved:**
+**After any refresh, rebuild the cache and redeploy:**
 
 ```r
-source("00_run_pipeline.R")                                   # refresh + rebuild cache
-rsconnect::writeManifest(appFiles = c("app.R", "frw.rds"))     # only if deps changed
+source("00_run_pipeline.R")   # refresh + rewrite frw.rds
 ```
 
-Then push — Connect Cloud redeploys on push. The `appFiles` argument is load-bearing:
-without it the manifest picks up the pipeline scripts' dependencies too.
+Then hit Deploy in the extension.
+
+Beware what is in the Publisher file list. Including `01_refresh_data.R` and
+`02_build_archive.R` drags `tidyverse` and `skimr` into the dependency scan, and the
+refresh script is actively unsafe to run on the server: the raw archive is not
+deployed, so it would see an empty folder, resolve `sdate` to 2006-01-01, and pull the
+entire archive from IEM on every container start.
 
 ## Conventions
 
