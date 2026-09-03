@@ -1,0 +1,126 @@
+issuing_wfo,wfo_city,wfo_state,wfo_region,n_warnings
+OUN,Norman,OK,SR,182
+AMA,Amarillo,TX,SR,175
+SJT,San Angelo,TX,SR,40
+FWD,Fort Worth,TX,SR,34
+ABQ,Albuquerque,NM,SR,33
+EWX,Austin/San Antonio,TX,SR,20
+TSA,Tulsa,OK,SR,19
+GLD,Goodland,KS,CR,10
+GJT,Grand Junction,CO,CR,9
+SHV,Shreveport,LA,SR,9
+DDC,Dodge City,KS,CR,8
+MAF,Midland/Odessa,TX,SR,8
+MFR,Medford,OR,WR,8
+RIW,Riverton,WY,CR,8
+BOU,Denver,CO,CR,6
+ICT,Wichita,KS,CR,5
+LUB,Lubbock,TX,SR,5
+TOP,Topeka,KS,CR,5
+EPZ,El Paso Tx/Santa Teresa,NM,SR,4
+MQT,Marquette,MI,CR,4
+PUB,Pueblo,CO,CR,4
+SLC,Salt Lake City,UT,WR,4
+STO,Sacramento,CA,WR,4
+TWC,Tucson,AZ,WR,4
+CRP,Corpus Christi,TX,SR,3
+CYS,Cheyenne,WY,CR,3
+GID,Hastings,NE,CR,3
+HGX,Houston/Galveston,TX,SR,3
+LOX,Los Angeles/Oxnard,CA,WR,3
+OAX,Omaha/Valley,NE,CR,3
+UNR,Rapid City,SD,CR,3
+JAN,Jackson,MS,SR,2
+MSO,Missoula,MT,WR,2
+OTX,Spokane,WA,WR,2
+PIH,Pocatello,ID,WR,2
+CHS,Charleston,SC,ER,1
+MRX,Morristown,TN,SR,1
+ABR,Aberdeen,SD,CR,0
+AFC,Anchorage,AK,AR,0
+AFG,Fairbanks,AK,AR,0
+AJK,Juneau,AK,AR,0
+AKQ,Wakefield,VA,ER,0
+ALY,Albany,NY,ER,0
+APX,Gaylord,MI,CR,0
+ARX,La Crosse,WI,CR,0
+BGM,Binghamton,NY,ER,0
+BIS,Bismarck,ND,CR,0
+BMX,Birmingham,AL,SR,0
+BOI,Boise,ID,WR,0
+BOX,Norton,MA,ER,0
+BRO,Brownsville,TX,SR,0
+BTV,Burlington,VT,ER,0
+BUF,Buffalo,NY,ER,0
+BYZ,Billings,MT,WR,0
+CAE,Columbia,SC,ER,0
+CAR,Caribou,ME,ER,0
+CLE,Cleveland,OH,ER,0
+CTP,State College,PA,ER,0
+DLH,Duluth,MN,CR,0
+DMX,Des Moines,IA,CR,0
+DTX,Detroit/Pontiac,MI,CR,0
+DVN,Quad Cities,IL,CR,0
+EAX,Kansas City/Pleasant Hill,MO,CR,0
+EKA,Eureka,CA,WR,0
+FFC,Peachtree City,GA,SR,0
+FGF,Grand Forks,ND,CR,0
+FGZ,Flagstaff,AZ,WR,0
+FSD,Sioux Falls,SD,CR,0
+GGW,Glasgow,MT,WR,0
+GRB,Green Bay,WI,CR,0
+GRR,Grand Rapids,MI,CR,0
+GSP,Greenville-Spartanburg,SC,ER,0
+GUM,Tiyan,GU,PR,0
+GYX,Gray,ME,ER,0
+HFO,Honolulu,HI,PR,0
+HNX,Hanford,CA,WR,0
+HUN,Huntsville,AL,SR,0
+ILM,Wilmington,NC,ER,0
+ILN,Wilmington,OH,ER,0
+ILX,Lincoln,IL,CR,0
+IND,Indianapolis,IN,CR,0
+IWX,Northern Indiana,IN,CR,0
+JAX,Jacksonville,FL,SR,0
+JKL,Jackson,KY,CR,0
+KEY,Key West,FL,SR,0
+LBF,North Platte,NE,CR,0
+LCH,Lake Charles,LA,SR,0
+LIX,New Orleans,LA,SR,0
+LKN,Elko,NV,WR,0
+LMK,Louisville,KY,CR,0
+LOT,Chicago,IL,CR,0
+LSX,St Louis,MO,CR,0
+LWX,Baltimore MD/Washington,DC,ER,0
+LZK,Little Rock,AR,SR,0
+MEG,Memphis,TN,SR,0
+MFL,Miami,FL,SR,0
+MHX,Newport/Morehead City,NC,ER,0
+MKX,Milwaukee/Sullivan,WI,CR,0
+MLB,Melbourne,FL,SR,0
+MOB,Mobile,AL,SR,0
+MPX,Twin Cities/Chanhassen,MN,CR,0
+MTR,San Francisco,CA,WR,0
+OHX,Nashville,TN,SR,0
+OKX,Upton,NY,ER,0
+PAH,Paducah,KY,CR,0
+PBZ,Pittsburgh,PA,ER,0
+PDT,Pendleton,OR,WR,0
+PHI,Mount Holly,NJ,ER,0
+PPG,Pago Pago,AS,PR,0
+PQE,Micronesia Domain East,PQ,PR,0
+PQR,Portland,OR,WR,0
+PQW,Micronesia Domain West,PQ,PR,0
+PSR,Phoenix,AZ,WR,0
+RAH,Raleigh,NC,ER,0
+REV,Reno,NV,WR,0
+RLX,Charleston,WV,ER,0
+RNK,Blacksburg,VA,ER,0
+SEW,Seattle,WA,WR,0
+SGF,Springfield,MO,CR,0
+SGX,San Diego,CA,WR,0
+SJU,San Juan,PR,SR,0
+TAE,Tallahassee,FL,SR,0
+TBW,Tampa Bay Ruskin,FL,SR,0
+TFX,Great Falls,MT,WR,0
+VEF,Las Vegas,NV,WR,0

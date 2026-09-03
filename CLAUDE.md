@@ -10,10 +10,12 @@ they exist. Source is the Iowa Environmental Mesonet (IEM). R / tidyverse / sf.
 | `00_run_pipeline.R` | Sources the other two in order. The normal entry point. |
 | `01_refresh_data.R` | Tops up the local archive from IEM. **Incremental** — asks only for the window not already on disk. |
 | `02_build_archive.R` | Reads the local archive, builds `frw`, writes `frw.rds`. Never touches the network. |
+| `03_map_warnings.R` | Counts warnings by issuing WFO and maps them onto CWA boundaries. Reads `frw.rds`; never touches the network. |
 | `app.R` | Shiny browser for the archive. Reads `frw.rds`. |
 
 They stay separate on purpose: the build reads only what is on disk, so a rebuild is
-reproducible and works offline. Each still runs standalone.
+reproducible and works offline. Each still runs standalone. `00_run_pipeline.R` stops
+at the build; `03` is analysis, run it when you want the map.
 
 All paths are relative to the working directory, so the folder can be moved or shared.
 Start R in the archive folder. The app must stay named `app.R` — `rsconnect` normalizes
@@ -46,6 +48,8 @@ top-up is ~100 KB. Do not "simplify" this back into a full re-download.
   match, so `FRW` returns every WFO. Archive starts 2006-01-13.
 - **Polygons** — `cgi-bin/request/gis/misc.py?format=shp`. Non-VTEC, non-SPS polygons
   only, and **nothing before 2022**.
+- **CWA boundaries** — `w_16ap26/`, from https://www.weather.gov/gis/CWABounds. 27 MB,
+  gitignored, re-downloadable. `CWA` is the field that matches `issuing_wfo`.
 
 Most warnings have no polygon at all. That is normal, not a join failure.
 
@@ -92,6 +96,46 @@ Beware what is in the Publisher file list. Including `01_refresh_data.R` and
 refresh script is actively unsafe to run on the server: the raw archive is not
 deployed, so it would see an empty folder, resolve `sdate` to 2006-01-01, and pull the
 entire archive from IEM on every container start.
+
+## Mapping by office
+
+`03_map_warnings.R` writes `03_wfo_warning_counts.csv` (one row per office, all 125,
+zeros included), `03_wfo_warning_counts.pdf` (the publication copy, vector, font
+embedded) and `03_wfo_warning_counts.png` (for a quick look and for slides).
+
+Every issuing office joins to a CWA polygon, and the script stops if one ever does not
+rather than dropping it off the map.
+
+The map is meant to be publication-ready, and three things in it are deliberate:
+
+- **The count is printed inside each office that has one.** The fill carries the
+  pattern, the label carries the value, so the reader never has to estimate from a
+  colour. Labels sit at `st_point_on_surface()`, not `st_centroid()` — a centroid can
+  land outside a concave CWA.
+- **Binned fill, with "None" as its own key.** OUN and AMA alone are over half the
+  archive, so a continuous scale flattens everything else to white; and a zero
+  competing with the lowest bin for the palest colour reads as "one or two".
+- **The legend gets a layer of empty geometries, one per bin.** ggplot draws no key
+  glyph for a bin with no data — 50–99 is empty right now — and `override.aes` does
+  not bring it back. The dummy layer gives every key a data row without drawing
+  anything on the map. Don't delete it as dead code.
+
+Two things about the PDF are load-bearing:
+
+- **The device is `quartz()`, not `cairo_pdf`.** cairo fails here with "invalid font
+  type" because it cannot resolve a macOS system font, and the base `pdf()` device
+  drops the en dash. cairo is the fallback off macOS.
+- **Boundaries are thinned with `rmapshaper::ms_simplify()`** before plotting. At full
+  county-level detail the shapefile is 1.7 million vertices and the PDF is 18 MB;
+  thinned, it is under 1 MB and looks identical at this scale. It must be
+  `ms_simplify()` and not `st_simplify()` — the latter thins each polygon
+  independently and opens slivers between neighbouring offices.
+
+Font falls back to `sans` where Avenir Next and Helvetica Neue are not installed;
+`rmapshaper` and `ragg` are used when present but neither is required.
+
+Alaska, Hawaii, the Pacific and Puerto Rico are dropped from the map only — they have
+never issued an FRW, and they cost CONUS most of the frame. They are still in the CSV.
 
 ## Conventions
 

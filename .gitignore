@@ -12,3 +12,7 @@ misc_warning_shape_files/
 rsconnect/
 
 .DS_Store
+
+# NWS CWA boundaries, an input to 03_map_warnings.R. 27 MB, and re-downloadable
+# from https://www.weather.gov/gis/CWABounds.
+w_16ap26/
