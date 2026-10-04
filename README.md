@@ -79,7 +79,7 @@ the deployable site         the print map
 
 ```sh
 Rscript 00_run_pipeline.R     # refresh, build data, assemble site
-python3 preview.py            # http://localhost:8903
+python3 preview.py            # http://localhost:8904
 ```
 
 R packages: `tidyverse`, `sf`, `jsonlite`, `curl`, `here`. `rmapshaper` to

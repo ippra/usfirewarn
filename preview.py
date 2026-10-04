@@ -1,7 +1,7 @@
 """Serve the built site for preview, without letting the browser cache the HTML.
 
 Usage:
-    python3 preview.py [port]          # defaults to 8903
+    python3 preview.py [port]          # defaults to 8904
 
 Every asset the site loads carries a ?v=<build> stamp, so a rebuild changes
 their URLs and the browser fetches them fresh. index.html is the one file that
@@ -42,7 +42,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
 
 def main():
-    port = int(sys.argv[1]) if len(sys.argv) > 1 else 8903
+    port = int(sys.argv[1]) if len(sys.argv) > 1 else 8904
     if not os.path.exists(os.path.join(ROOT, "index.html")):
         sys.exit("No built site at %s - run 03_build_dashboard.R first." % ROOT)
     handler = functools.partial(Handler, directory=ROOT)

@@ -11,7 +11,7 @@ behind it and how it deploys. Read it before changing anything.
 ## Working here
 
 - Run `Rscript 00_run_pipeline.R`, then `python3 preview.py` and look at
-  http://localhost:8903. The build takes under a minute.
+  http://localhost:8904. The build takes under a minute.
 - `site/` is the front end source. `03_build_dashboard.R` copies it into
   `outputs/03_site/` and stamps `__BUILD__`; never edit the copy.
 - `data/` and `outputs/` are gitignored and rebuilt by the pipeline.
