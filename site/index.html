@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="usfirewarn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+// Some static handlers serve /usfirewarn without the trailing slash, which
+// breaks every relative URL in this page. Canonicalize first.
+(function(){var p=location.pathname;
+if(!/\/$/.test(p)&&!/\.html$/.test(p)){location.replace(p+"/"+location.search+location.hash);}})();
+</script>
+<title>US FireWarn — National Weather Service Fire Warnings</title>
+<meta name="description" content="Every Fire Warning the National Weather Service has issued since 2006: where, when, who asked for it and what it said, updated every few hours.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23e07227'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%23ffd8c3'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="./assets/vendor/maplibre-gl-6.10.0/maplibre-gl.css">
+<link rel="stylesheet" href="./engine.css?v=__BUILD__">
+<script>
+window.USF_BUILD = "__BUILD__";
+// Watchdog: if the app never leaves the loading screen, say what failed rather
+// than leaving a blank map.
+window.__usfFailed = [];
+window.addEventListener("error", function (e) {
+  var t = e && e.target;
+  if (t && (t.src || t.href)) { window.__usfFailed.push(t.src || t.href); }
+  else { window.__usfErr = (e && e.message) || String(e); }
+}, true);
+window.addEventListener("unhandledrejection", function (e) {
+  window.__usfErr = "async: " + ((e.reason && e.reason.message) || e.reason);
+});
+window.addEventListener("load", function () { setTimeout(function () {
+  var l = document.getElementById("boot");
+  if (!l || l.hidden) return;
+  var d = ["engine.js executed: " + (window.USF_ENGINE_LOADED ? "yes" : "NO")];
+  if (window.__usfFailed.length) d.push("failed to load: " + window.__usfFailed.join(", "));
+  if (window.__usfErr) d.push("error: " + window.__usfErr);
+  l.textContent = "The map failed to start.\n\nDiagnostics (please send these to the maintainers):\n" +
+    d.join("\n") + "\nbuild " + window.USF_BUILD + " — " + navigator.userAgent;
+  l.classList.add("boot-failed");
+}, 8000); });
+</script>
+<script>
+// Theme precedence: ?theme= deep link, then the viewer's pick for this tab,
+// then the light default. Set here so the page never paints in the wrong one.
+(function () {
+  var ids = ["usfirewarn", "dark", "greyscale"];
+  var pick = null;
+  try {
+    pick = new URLSearchParams(location.search).get("theme") ||
+      sessionStorage.getItem("usfirewarn-theme");
+  } catch (e) { /* private mode */ }
+  if (ids.indexOf(pick) !== -1) document.documentElement.dataset.theme = pick;
+})();
+</script>
+</head>
+<body>
+<!-- The IPPRA institutional bar, shared with every IPPRA dashboard. Static
+     markup so it paints with the page; see fusion_dash/site/index.html for why
+     it has two modes. -->
+<div id="ippra-bar">
+  <a class="ippra-bar-home" href="https://ippra.net">IPPRA &middot; University of Oklahoma</a>
+  <a class="ippra-bar-back" href="https://ippra.net"><span aria-hidden="true">&larr;</span> Back to IPPRA</a>
+</div>
+<script>
+(function () {
+  var root = document.documentElement;
+  // Only ever return to a path on this origin: an absolute destination would
+  // make this an open redirect.
+  function safePath(p) {
+    return (typeof p === "string" && p.charAt(0) === "/" &&
+            p.charAt(1) !== "/" && p.charAt(1) !== "\\") ? p : null;
+  }
+  var back = null;
+  try {
+    back = safePath(new URLSearchParams(location.search).get("from"));
+    if (!back && document.referrer) {
+      var r = new URL(document.referrer);
+      if (r.origin === location.origin &&
+          r.pathname.replace(/\/+$/, "") !== location.pathname.replace(/\/+$/, "")) {
+        back = r.pathname + r.search;
+      }
+    }
+  } catch (e) { /* malformed referrer: keep the institutional link */ }
+
+  if (back) {
+    root.setAttribute("data-entry", "referred");
+    var backLink = document.querySelector(".ippra-bar-back");
+    backLink.setAttribute("href", back);
+    // Links from ippra.net open a new tab, so "back" means closing it. close()
+    // is refused silently once the tab has history, hence the fallback timer.
+    backLink.addEventListener("click", function (ev) {
+      if (ev.button !== 0 || ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) return;
+      ev.preventDefault();
+      var href = backLink.getAttribute("href");
+      window.close();
+      setTimeout(function () { location.href = href; }, 150);
+    });
+    if (window.history && history.replaceState && /[?&]from=/.test(location.search)) {
+      var q = new URLSearchParams(location.search);
+      q.delete("from");
+      var qs = q.toString();
+      history.replaceState(null, "", location.pathname + (qs ? "?" + qs : "") + location.hash);
+    }
+  }
+})();
+</script>
+
+<!-- The masthead the institute's dashboards share (s3ok_dash, errs). The
+     Beta badge ships hidden; 03_build_dashboard.R shows it in the beta build
+     only. -->
+<header id="navbar">
+  <span id="nav-title">
+    <span class="brand-name">US FireWarn<span class="brand-beta" hidden>Beta</span></span>
+    <span class="brand-sub">NWS Fire Warnings across the United States</span>
+  </span>
+  <div id="theme-switch">
+    <button id="theme-btn" type="button" title="Adjust colors" aria-haspopup="true" aria-expanded="false">&#9680; Adjust colors</button>
+    <div id="theme-menu">
+      <button type="button" data-theme="usfirewarn"><span class="swatch" style="background:#443A83"></span>US FireWarn</button>
+      <button type="button" data-theme="dark"><span class="swatch" style="background:#0f172a"></span>Dark</button>
+      <button type="button" data-theme="greyscale"><span class="swatch" style="background:#000000"></span>Greyscale (high contrast)</button>
+    </div>
+  </div>
+</header>
+
+<div id="shell">
+  <aside id="panel" aria-label="Controls and summary">
+    <header class="panel-head">
+      <p class="eyebrow">Fire Warnings &middot; University of Oklahoma</p>
+      <h1>Fire Warnings in the United States</h1>
+      <p class="lede">Every Fire Warning the National Weather Service has issued since 2006</p>
+      <p class="freshness" id="freshness"><span class="live-dot" aria-hidden="true"></span><span id="freshness-text">Loading&hellip;</span></p>
+    </header>
+
+    <section class="block" aria-labelledby="h-dates">
+      <h2 id="h-dates">Dates</h2>
+      <div class="presets" id="presets" role="group" aria-label="Date presets"></div>
+      <div class="date-row">
+        <label>From <input type="date" id="date-start"></label>
+        <label>To <input type="date" id="date-end"></label>
+      </div>
+      <div class="step-row">
+        <button type="button" class="btn icon" id="step-back" title="Earlier period (←)" aria-label="Earlier period">&#9664;</button>
+        <span class="range-label" id="range-label" aria-live="polite"></span>
+        <button type="button" class="btn icon" id="step-fwd" title="Later period (→)" aria-label="Later period">&#9654;</button>
+      </div>
+    </section>
+
+    <section class="block" aria-labelledby="h-filter">
+      <h2 id="h-filter">Find</h2>
+      <input type="search" class="search" id="search" placeholder="Search the warning text" aria-label="Search the warning text" autocomplete="off" spellcheck="false">
+      <div class="filter-row">
+        <label>Office <select id="office"></select></label>
+        <label>State <select id="state"></select></label>
+      </div>
+      <button type="button" class="link-btn" id="clear-filters" hidden>Clear search and filters</button>
+    </section>
+
+    <section class="block" aria-labelledby="h-summary">
+      <h2 id="h-summary">In this selection</h2>
+      <div class="tiles" id="tiles"></div>
+      <div class="legend" id="legend"></div>
+    </section>
+
+    <section class="block" aria-labelledby="h-history">
+      <h2 id="h-history">Historic days</h2>
+      <h3 class="sub">Most Fire Warnings issued</h3>
+      <ol class="history-list warn" id="history-days"></ol>
+      <p class="note">Across the whole archive, whatever is selected.</p>
+    </section>
+
+    <section class="block" aria-labelledby="h-rank">
+      <h2 id="h-rank">Where they were issued</h2>
+      <div class="seg small" role="radiogroup" aria-label="Rank by" id="rank-seg">
+        <button type="button" role="radio" data-rank="office">By office</button>
+        <button type="button" role="radio" data-rank="state">By state</button>
+      </div>
+      <ol class="county-list" id="rank-list"></ol>
+      <button type="button" class="link-btn" id="rank-more" hidden></button>
+    </section>
+
+    <section class="block" aria-labelledby="h-warnings">
+      <h2 id="h-warnings">Warnings</h2>
+      <ol class="warning-list" id="warning-list"></ol>
+      <button type="button" class="link-btn" id="warning-more" hidden></button>
+    </section>
+
+    <section class="block actions" aria-label="Share and download">
+      <button type="button" class="btn" id="copy-link">Copy link</button>
+      <button type="button" class="btn" id="save-png">Save image</button>
+      <button type="button" class="btn" id="download-csv">Download CSV</button>
+    </section>
+
+    <section class="block about">
+      <details>
+        <summary>About these data</summary>
+        <div id="about"></div>
+      </details>
+    </section>
+  </aside>
+
+  <main id="stage">
+    <div id="map" role="region" aria-label="Map of Fire Warnings"></div>
+    <div id="boot" class="boot">Loading Fire Warnings&hellip;</div>
+    <div id="toast" class="toast" role="status" hidden></div>
+    <div class="basemaps" id="basemaps" role="radiogroup" aria-label="Base map"></div>
+    <aside id="detail" class="detail" aria-label="Selected warning" hidden>
+      <button type="button" class="detail-close" id="detail-close" aria-label="Close warning">&times;</button>
+      <div id="detail-body"></div>
+    </aside>
+    <section id="timeline-wrap" aria-label="Timeline">
+      <div class="timeline-head">
+        <span class="timeline-title" id="timeline-title">Warnings per month</span>
+        <span class="timeline-hint">Drag to choose dates</span>
+        <div class="seg tiny" role="radiogroup" aria-label="Timeline span" id="zoom-seg">
+          <button type="button" role="radio" data-zoom="all">All years</button>
+          <button type="button" role="radio" data-zoom="year">One year</button>
+          <button type="button" role="radio" data-zoom="fit">Fit dates</button>
+        </div>
+      </div>
+      <div class="timeline-body">
+        <canvas id="timeline" tabindex="0" aria-label="Fire Warnings over time. Drag to select a date range; arrow keys move it."></canvas>
+        <div id="timeline-tip" class="tip" hidden></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script type="module" src="./engine.js?v=__BUILD__"></script>
+</body>
+</html>

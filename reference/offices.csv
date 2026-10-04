@@ -1,0 +1,126 @@
+office,city,state,region
+ABQ,Albuquerque,NM,SR
+ABR,Aberdeen,SD,CR
+AFC,Anchorage,AK,AR
+AFG,Fairbanks,AK,AR
+AJK,Juneau,AK,AR
+AKQ,Wakefield,VA,ER
+ALY,Albany,NY,ER
+AMA,Amarillo,TX,SR
+APX,Gaylord,MI,CR
+ARX,La Crosse,WI,CR
+BGM,Binghamton,NY,ER
+BIS,Bismarck,ND,CR
+BMX,Birmingham,AL,SR
+BOI,Boise,ID,WR
+BOU,Denver,CO,CR
+BOX,Norton,MA,ER
+BRO,Brownsville,TX,SR
+BTV,Burlington,VT,ER
+BUF,Buffalo,NY,ER
+BYZ,Billings,MT,WR
+CAE,Columbia,SC,ER
+CAR,Caribou,ME,ER
+CHS,Charleston,SC,ER
+CLE,Cleveland,OH,ER
+CRP,Corpus Christi,TX,SR
+CTP,State College,PA,ER
+CYS,Cheyenne,WY,CR
+DDC,Dodge City,KS,CR
+DLH,Duluth,MN,CR
+DMX,Des Moines,IA,CR
+DTX,Detroit/Pontiac,MI,CR
+DVN,Quad Cities,IL,CR
+EAX,Kansas City/Pleasant Hill,MO,CR
+EKA,Eureka,CA,WR
+EPZ,El Paso Tx/Santa Teresa,NM,SR
+EWX,Austin/San Antonio,TX,SR
+FFC,Peachtree City,GA,SR
+FGF,Grand Forks,ND,CR
+FGZ,Flagstaff,AZ,WR
+FSD,Sioux Falls,SD,CR
+FWD,Fort Worth,TX,SR
+GGW,Glasgow,MT,WR
+GID,Hastings,NE,CR
+GJT,Grand Junction,CO,CR
+GLD,Goodland,KS,CR
+GRB,Green Bay,WI,CR
+GRR,Grand Rapids,MI,CR
+GSP,Greenville-Spartanburg,SC,ER
+GUM,Tiyan,GU,PR
+GYX,Gray,ME,ER
+HFO,Honolulu,HI,PR
+HGX,Houston/Galveston,TX,SR
+HNX,Hanford,CA,WR
+HUN,Huntsville,AL,SR
+ICT,Wichita,KS,CR
+ILM,Wilmington,NC,ER
+ILN,Wilmington,OH,ER
+ILX,Lincoln,IL,CR
+IND,Indianapolis,IN,CR
+IWX,Northern Indiana,IN,CR
+JAN,Jackson,MS,SR
+JAX,Jacksonville,FL,SR
+JKL,Jackson,KY,CR
+KEY,Key West,FL,SR
+LBF,North Platte,NE,CR
+LCH,Lake Charles,LA,SR
+LIX,New Orleans,LA,SR
+LKN,Elko,NV,WR
+LMK,Louisville,KY,CR
+LOT,Chicago,IL,CR
+LOX,Los Angeles/Oxnard,CA,WR
+LSX,St Louis,MO,CR
+LUB,Lubbock,TX,SR
+LWX,Baltimore MD/Washington,DC,ER
+LZK,Little Rock,AR,SR
+MAF,Midland/Odessa,TX,SR
+MEG,Memphis,TN,SR
+MFL,Miami,FL,SR
+MFR,Medford,OR,WR
+MHX,Newport/Morehead City,NC,ER
+MKX,Milwaukee/Sullivan,WI,CR
+MLB,Melbourne,FL,SR
+MOB,Mobile,AL,SR
+MPX,Twin Cities/Chanhassen,MN,CR
+MQT,Marquette,MI,CR
+MRX,Morristown,TN,SR
+MSO,Missoula,MT,WR
+MTR,San Francisco,CA,WR
+OAX,Omaha/Valley,NE,CR
+OHX,Nashville,TN,SR
+OKX,Upton,NY,ER
+OTX,Spokane,WA,WR
+OUN,Norman,OK,SR
+PAH,Paducah,KY,CR
+PBZ,Pittsburgh,PA,ER
+PDT,Pendleton,OR,WR
+PHI,Mount Holly,NJ,ER
+PIH,Pocatello,ID,WR
+PPG,Pago Pago,AS,PR
+PQE,Micronesia Domain East,PQ,PR
+PQR,Portland,OR,WR
+PQW,Micronesia Domain West,PQ,PR
+PSR,Phoenix,AZ,WR
+PUB,Pueblo,CO,CR
+RAH,Raleigh,NC,ER
+REV,Reno,NV,WR
+RIW,Riverton,WY,CR
+RLX,Charleston,WV,ER
+RNK,Blacksburg,VA,ER
+SEW,Seattle,WA,WR
+SGF,Springfield,MO,CR
+SGX,San Diego,CA,WR
+SHV,Shreveport,LA,SR
+SJT,San Angelo,TX,SR
+SJU,San Juan,PR,SR
+SLC,Salt Lake City,UT,WR
+STO,Sacramento,CA,WR
+TAE,Tallahassee,FL,SR
+TBW,Tampa Bay Ruskin,FL,SR
+TFX,Great Falls,MT,WR
+TOP,Topeka,KS,CR
+TSA,Tulsa,OK,SR
+TWC,Tucson,AZ,WR
+UNR,Rapid City,SD,CR
+VEF,Las Vegas,NV,WR

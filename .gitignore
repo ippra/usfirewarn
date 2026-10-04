@@ -1,18 +1,6 @@
-# The raw IEM archive. Rebuildable with 01_refresh_data.R, ~16 MB of binary
-# shapefiles that would grow with every refresh, and not needed to run the app —
-# frw.rds is. Keeping it out is what makes a public repo reasonable.
-raw_warning_text_files/
-misc_warning_shape_files/
-
-# R
-.Rproj.user/
+data/
+outputs/
 .Rhistory
 .RData
-.Ruserdata
-rsconnect/
-
+.Rproj.user/
 .DS_Store
-
-# NWS CWA boundaries, an input to 03_map_warnings.R. 27 MB, and re-downloadable
-# from https://www.weather.gov/gis/CWABounds.
-w_16ap26/

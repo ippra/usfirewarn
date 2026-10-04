@@ -1,43 +1,37 @@
-# Libraries -------------------------------------------------------------------
 library(tidyverse)
 library(sf)
 
-# Data -------------------------------------------------------------------------
-# Counts of fire warnings by issuing WFO, mapped onto NWS county warning areas.
-#
-# frw.rds is the built archive from 02_build_archive.R. This script never
-# touches the network and never rebuilds; run 00_run_pipeline.R first if the
-# cache is stale.
-#
-# w_16ap26 is the NWS public forecast zones / CWA boundary shapefile, valid
-# 16 Apr 2026:
-#   https://www.weather.gov/gis/CWABounds
+source(here::here("00_paths.R"))
 
-# Paths -----------------------------------------------------------------------
-base_dir <- getwd()
-archive_file <- file.path(base_dir, "frw.rds")
-cwa_file <- file.path(base_dir, "w_16ap26", "w_16ap26.shp")
+# Warnings by Office -----------------------------------------------------------
+# Counts Fire Warnings by issuing office and maps them onto NWS county warning
+# areas, for print. Analysis, not part of the site: 00_run_pipeline.R does not
+# run it. Reads 02's warnings and never touches the network.
+#
+# Writes outputs/04_wfo_warning_counts.csv, .pdf and .png.
 
-if (!file.exists(archive_file)) {
-  stop("No frw.rds in ", base_dir,
-       "\nRun 00_run_pipeline.R first, or start R in the archive folder.",
-       call. = FALSE)
+warnings_file <- file.path(outputs, "02_warnings", "warnings.geojson")
+
+if (!file.exists(warnings_file)) {
+  stop("No warnings - run 02_build_warnings.R first.")
 }
 
 if (!file.exists(cwa_file)) {
-  stop("No CWA boundaries at ", cwa_file,
-       "\nDownload w_16ap26 from https://www.weather.gov/gis/CWABounds.",
-       call. = FALSE)
+  stop("No CWA boundaries at ", cwa_file, " - see 00_paths.R for the source.")
 }
 
-frw <- readRDS(archive_file)
+# issue_date is the local day the warning was issued, as the site dates it.
+warnings_data <- warnings_file |>
+  st_read(quiet = TRUE) |>
+  st_drop_geometry() |>
+  transmute(issuing_wfo = office, issue_date = archive_start + d0)
 
-# County warning areas ---------------------------------------------------------
+# County Warning Areas ---------------------------------------------------------
 # CWA is the three-letter office id that matches issuing_wfo. Guam and the
 # Pacific domains carry no CWA polygon geometry worth mapping, but they are kept
 # here so the count table covers every office.
-cwa <-
-  read_sf(cwa_file) |>
+cwa_data <- cwa_file |>
+  read_sf() |>
   select(
     issuing_wfo = CWA, wfo_city = CITY, wfo_state = ST, wfo_region = REGION
   )
@@ -48,30 +42,27 @@ cwa <-
 # st_simplify() thins each polygon independently and opens slivers between
 # them. Skipped, not required, where rmapshaper is not installed.
 if (requireNamespace("rmapshaper", quietly = TRUE)) {
-  cwa <- rmapshaper::ms_simplify(cwa, keep = 0.02, keep_shapes = TRUE)
+  cwa_data <- cwa_data |>
+    rmapshaper::ms_simplify(keep = 0.02, keep_shapes = TRUE)
 }
 
-# Counts by office -------------------------------------------------------------
-# st_drop_geometry() first: count() on an sf object unions the geometry.
-wfo_counts <-
-  frw |>
-  st_drop_geometry() |>
+# Counts by Office -------------------------------------------------------------
+wfo_counts_data <- warnings_data |>
   count(issuing_wfo, name = "n_warnings")
 
 # Check before the join, not after - an office with no polygon would otherwise
 # drop out of the map without an error.
-unmatched <- anti_join(wfo_counts, st_drop_geometry(cwa), by = "issuing_wfo")
+unmatched_data <- wfo_counts_data |>
+  anti_join(st_drop_geometry(cwa_data), by = "issuing_wfo")
 
-if (nrow(unmatched) > 0) {
-  print(unmatched)
-  stop("Offices above have no CWA polygon - they would be dropped silently.",
-       call. = FALSE)
+if (nrow(unmatched_data) > 0) {
+  print(unmatched_data)
+  stop("Offices above have no CWA polygon - they would be dropped silently.")
 }
 
 # Offices that issued nothing are real zeros, not missing data.
-wfo_warnings <-
-  cwa |>
-  left_join(wfo_counts, by = "issuing_wfo") |>
+wfo_warnings_data <- cwa_data |>
+  left_join(wfo_counts_data, by = "issuing_wfo") |>
   mutate(n_warnings = replace_na(n_warnings, 0L)) |>
   arrange(desc(n_warnings), issuing_wfo)
 
@@ -86,8 +77,7 @@ wfo_warnings <-
 # colour. The count is printed in each office that has one, so the fill carries
 # the pattern and the label carries the value.
 count_breaks <- c(-1, 0, 4, 9, 24, 49, 99, Inf)
-count_labels <- c("None", "1–4", "5–9", "10–24", "25–49",
-                  "50–99", "100+")
+count_labels <- c("None", "1–4", "5–9", "10–24", "25–49", "50–99", "100+")
 
 # Warm sequential ramp, sand through ember. Held apart from the neutral used for
 # offices with no warnings so "none" never reads as "one or two".
@@ -113,14 +103,12 @@ map_font <- font_choices[font_choices %in% c(installed_fonts, "sans")][1]
 
 # st_point_on_surface() rather than st_centroid(): a few CWAs are concave or
 # split across islands, and a centroid can land outside the polygon it labels.
-wfo_conus <-
-  wfo_warnings |>
+wfo_conus_data <- wfo_warnings_data |>
   filter(!wfo_region %in% c("AR", "PR"), !wfo_state %in% c("PR", "VI")) |>
   st_transform(5070) |>
   mutate(count_bin = cut(n_warnings, count_breaks, labels = count_labels))
 
-wfo_labels <-
-  wfo_conus |>
+wfo_labels_data <- wfo_conus_data |>
   filter(n_warnings > 0) |>
   mutate(
     label_colour = if_else(n_warnings >= 25, "#FFFFFF", "#4A3529"),
@@ -135,12 +123,12 @@ legend_keys <- st_sf(
   count_bin = factor(count_labels, levels = count_labels),
   geometry = st_sfc(
     rep(list(st_polygon()), length(count_labels)),
-    crs = st_crs(wfo_conus)
+    crs = st_crs(wfo_conus_data)
   )
 )
 
-wfo_map <-
-  ggplot(wfo_conus) +
+wfo_map <- wfo_conus_data |>
+  ggplot() +
   geom_sf(
     aes(fill = count_bin),
     colour = "#FFFFFF",
@@ -149,7 +137,7 @@ wfo_map <-
   ) +
   geom_sf(data = legend_keys, aes(fill = count_bin), key_glyph = "rect") +
   geom_sf_text(
-    data = wfo_labels,
+    data = wfo_labels_data,
     aes(label = n_warnings, colour = label_colour),
     family = map_font,
     fontface = "bold",
@@ -170,9 +158,10 @@ wfo_map <-
     # Full dates rather than years: the archive starts and ends mid-year, so
     # "2006-2026" overstates both ends by up to a year.
     subtitle = str_c(
-      "N = ", nrow(frw), " warnings, ",
-      format(min(frw$issue_date), "%B %e, %Y") |> str_squish(), " – ",
-      format(max(frw$issue_date), "%B %e, %Y") |> str_squish()
+      "N = ", nrow(warnings_data), " warnings, ",
+      format(min(warnings_data$issue_date), "%B %e, %Y") |> str_squish(),
+      " – ",
+      format(max(warnings_data$issue_date), "%B %e, %Y") |> str_squish()
     ),
     caption = "Source: Iowa Environmental Mesonet AFOS archive"
   ) +
@@ -200,10 +189,9 @@ wfo_map <-
 
 # Output -----------------------------------------------------------------------
 # Named for the script that wrote them, so provenance is readable off the file.
-write_csv(
-  st_drop_geometry(wfo_warnings),
-  file.path(base_dir, "03_wfo_warning_counts.csv")
-)
+wfo_warnings_data |>
+  st_drop_geometry() |>
+  write_csv(file.path(outputs, "04_wfo_warning_counts.csv"))
 
 # PDF is the publication copy: vector, so boundaries and labels stay sharp at
 # any size, and the font is embedded.
@@ -212,7 +200,7 @@ write_csv(
 # own metrics and drops the en dash; cairo_pdf fails outright here with "invalid
 # font type" because it cannot resolve a macOS system font. quartz() handles
 # both, so use it where it exists and fall back to cairo elsewhere.
-pdf_file <- file.path(base_dir, "03_wfo_warning_counts.pdf")
+pdf_file <- file.path(outputs, "04_wfo_warning_counts.pdf")
 
 if (capabilities("aqua")) {
   grDevices::quartz(
@@ -222,18 +210,25 @@ if (capabilities("aqua")) {
     height = 7,
     bg = "#FFFFFF"
   )
-  print(wfo_map)   # print() is required: a plot is not drawn from inside a call
+  # print() is required: a plot is not drawn from inside a call
+  print(wfo_map)
   dev.off()
 } else {
-  ggsave(pdf_file, wfo_map, width = 10.5, height = 7, bg = "#FFFFFF",
-         device = cairo_pdf)
+  ggsave(
+    pdf_file,
+    wfo_map,
+    width = 10.5,
+    height = 7,
+    bg = "#FFFFFF",
+    device = cairo_pdf
+  )
 }
 
 # PNG alongside it, for a quick look and for pasting into slides. ragg renders
 # the labels far more cleanly than the default png device, but is not required
 # to run the script.
 ggsave(
-  file.path(base_dir, "03_wfo_warning_counts.png"),
+  file.path(outputs, "04_wfo_warning_counts.png"),
   wfo_map,
   width = 10.5,
   height = 7,
@@ -242,8 +237,8 @@ ggsave(
   device = if (requireNamespace("ragg", quietly = TRUE)) ragg::agg_png else NULL
 )
 
-# Checks ----------------------------------------------------------------------
-wfo_warnings |>
+# Checks -----------------------------------------------------------------------
+wfo_warnings_data |>
   st_drop_geometry() |>
   filter(n_warnings > 0) |>
   print(n = Inf)

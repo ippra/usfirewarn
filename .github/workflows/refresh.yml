@@ -1,0 +1,74 @@
+# Refresh from IEM and publish the beta to GitHub Pages.
+#
+# The beta lives at https://ippra.github.io/usfirewarn/ and is built with
+# USF_CHANNEL=beta: a Beta label in the masthead, a noindex tag and a
+# robots.txt that disallows everything. The production site at
+# ippra.net/usfirewarn is not deployed from here; it is built without the
+# channel variable and copied to our own server. See README.md, "Deploying".
+#
+# Runs the whole pipeline every three hours. The raw archive is not in the
+# repo and is not cached either: every run pulls it whole from IEM, about
+# 550 KB.
+#
+# A failed run publishes nothing, so the site keeps the last good build, and
+# GitHub emails the repository owner. The usual causes are IEM being down (the
+# next run retries) or a new warning the build cannot place or summarise,
+# which needs a look at the product it names.
+
+name: Refresh and publish
+
+on:
+  schedule:
+    - cron: "41 */3 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One run at a time, and never cancel one mid-publish.
+concurrency:
+  group: refresh
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          packages: |
+            any::tidyverse
+            any::sf
+            any::jsonlite
+            any::curl
+            any::here
+
+      - name: Refresh, build data, assemble site
+        env:
+          USF_CHANNEL: beta
+        run: Rscript 00_run_pipeline.R
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: outputs/03_site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
