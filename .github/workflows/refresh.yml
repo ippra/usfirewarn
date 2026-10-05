@@ -1,10 +1,8 @@
-# Refresh from IEM and publish the beta to GitHub Pages.
+# Refresh from IEM and publish the site to GitHub Pages.
 #
-# The beta lives at https://ippra.github.io/usfirewarn/ and is built with
-# USF_CHANNEL=beta: a Beta label in the masthead, a noindex tag and a
-# robots.txt that disallows everything. The production site at
-# ippra.net/usfirewarn is not deployed from here; it is built without the
-# channel variable and copied to our own server. See README.md, "Deploying".
+# The site lives at https://ippra.github.io/usfirewarn/. It is an IPPRA Labs
+# project, so this is its only deployment: nothing is copied to ippra.net.
+# See README.md, "Deploying".
 #
 # Runs the whole pipeline every three hours. The raw archive is not in the
 # repo and is not cached either: every run pulls it whole from IEM, about
@@ -55,8 +53,6 @@ jobs:
             any::here
 
       - name: Refresh, build data, assemble site
-        env:
-          USF_CHANNEL: beta
         run: Rscript 00_run_pipeline.R
 
       - uses: actions/upload-pages-artifact@v3

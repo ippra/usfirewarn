@@ -1284,7 +1284,7 @@ function renderAbout() {
   p(`<strong>Counts are not fire activity.</strong> Offices and the agencies they serve differ in whether they use Fire Warnings at all. NWS Norman and NWS Amarillo issued more than half the archive; most offices have never issued one. A state with few warnings may simply warn people about fire another way.`);
   p(`<strong>Summaries</strong> are the first paragraph of each message, and the requesting agency is read from its header; both are extracted by rule and can be clumsy. The full text is the record.`);
   p(`<strong>Updates.</strong> The archive is refreshed from IEM automatically, and this page checks for a newer build every 10 minutes while it is open.`);
-  p(`Built by the <a href="https://ippra.net">Institute for Public Policy Research and Analysis</a> at the University of Oklahoma. Oklahoma's warnings are mapped with satellite fire detections and Wireless Emergency Alerts on <a href="https://ippra.net/okfirewarn">OK FireWarn</a>.`);
+  p(`Built by the <a href="https://ippra.net">Institute for Public Policy Research and Analysis</a> at the University of Oklahoma. Oklahoma's warnings are mapped with satellite fire detections and Wireless Emergency Alerts on <a href="https://ippra.github.io/okfirewarn/">OK FireWarn</a>. An IPPRA Labs project: a working tool built on data other agencies publish.`);
 }
 
 // Themes -----------------------------------------------------------------------

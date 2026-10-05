@@ -9,8 +9,11 @@ same way as its Oklahoma sibling, [`okfirewarn`](https://github.com/ippra/okfire
 which maps Oklahoma's warnings with satellite fire detections and Wireless
 Emergency Alerts.
 
-- **Beta:** https://ippra.github.io/usfirewarn/
-- **Release:** https://ippra.net/usfirewarn
+- **Site:** https://ippra.github.io/usfirewarn/
+
+It is an IPPRA Labs project: a working tool built on data other agencies
+publish, rather than one of the institute's own data products. Labs projects
+are hosted on GitHub Pages and are not released to ippra.net.
 
 ## What it does
 
@@ -37,10 +40,9 @@ Emergency Alerts.
 - **Share and export.** The address bar always holds the current view,
   including the open warning, so a copied link reproduces it. Save the map as
   a PNG with a title and credits, or download the selected warnings as CSV.
-- **Updates itself.** The beta refreshes from IEM every three hours, and an
+- **Updates itself.** The site refreshes from IEM every three hours, and an
   open page checks for a newer build every 10 minutes and loads it without a
-  reload. The release on ippra.net holds the data it was copied with; see
-  Deploying.
+  reload.
 - **Light, dark and greyscale.** "Adjust colors" in the masthead switches the
   page's theme, as on the institute's other dashboards.
 
@@ -164,49 +166,25 @@ lines and every warning still draw.
 
 ## Deploying
 
-Two deployments of one build.
+One deployment: GitHub Pages, automatic. As an IPPRA Labs project the site is
+not copied to ippra.net.
 
-**Beta: GitHub Pages, automatic.** `.github/workflows/refresh.yml` runs the
-whole pipeline every three hours and on every push to `main`, and publishes
-`outputs/03_site/` to https://ippra.github.io/usfirewarn/. It sets
-`USF_CHANNEL=beta`, which puts a Beta label beside the masthead title, adds a
-`noindex` tag and writes a `robots.txt` that disallows everything, so the beta
-is never found in place of production. The repository's Pages source must be
-set to GitHub Actions (Settings, Pages).
+`.github/workflows/refresh.yml` runs the whole pipeline every three hours and
+on every push to `main`, and publishes `outputs/03_site/` to
+https://ippra.github.io/usfirewarn/. The repository's Pages source must be set
+to GitHub Actions (Settings, Pages).
 
-A failed run publishes nothing: the beta keeps its last good build and GitHub
+A failed run publishes nothing: the site keeps its last good build and GitHub
 emails the repository owner. The usual causes are IEM being down (the next run
 retries) or a new warning the build cannot place or summarise, which names the
 product to look at. GitHub stops the schedule after 60 days without a commit;
 the Actions tab has a button to restart it.
 
-**Production: ippra.net, by hand. Matt deploys it.** This needs R and the
-pipeline, which takes under a minute. From a clone of `main`:
-
-```
-Rscript 00_run_pipeline.R
-rsync -av --delete outputs/03_site/ <ippra.net host>:<docroot>/usfirewarn/
-```
-
-Leave `USF_CHANNEL` unset: that is what makes it the production build, with no
-Beta label and no `noindex`. R packages are listed under Building and
-previewing.
+The masthead carries a Labs badge on every build, and the site is open to
+search engines.
 
 The site is plain static files with relative URLs, so it runs under any path
-and needs no server-side code. One server setting: serve `index.html` with
-`Cache-Control: no-cache` (as for the dashboards, on the entry URLs
-`/usfirewarn`, `/usfirewarn/` and `/usfirewarn/index.html`), so a new deploy is
-seen without a hard refresh. Everything else carries a build stamp and can be
-cached as long as the server likes.
-
-After deploying, open https://ippra.net/usfirewarn and check two things: the
-map loads, and there is no Beta label beside "US FireWarn" in the masthead.
-
-Link to it from ippra.net as `/usfirewarn/?from=<path of the linking page>`,
-for example `/usfirewarn/?from=/tools`. A visitor who arrives that way gets a
-"Back to IPPRA" link in the black bar that returns them to that page; anyone
-else sees the institute's name there.
-
-Production holds the data it was copied with and does not refresh itself. To
-publish newer warnings or a newer version, pull `main`, run the pipeline and
-rsync again.
+and needs no server-side code. Should it ever move to another host: serve
+`index.html` with `Cache-Control: no-cache`, so a new build is seen without a
+hard refresh. Everything else carries a build stamp and can be cached as long
+as the server likes.

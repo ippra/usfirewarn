@@ -21,6 +21,6 @@ behind it and how it deploys. Read it before changing anything.
 - `04_map_offices.R` is analysis for print, outside the pipeline. Its notes on
   the legend's empty-geometry layer, `quartz()` for the PDF and
   `ms_simplify()` are load-bearing; keep them.
-- Deploying: the beta publishes from GitHub Actions on every push to `main`;
-  the release at ippra.net/usfirewarn is copied by hand by Matt. The status
-  tracker is the private repo `ippra/deployments`.
+- Deploying: an IPPRA Labs project, published to GitHub Pages by Actions
+  every three hours and on every push to `main`, and not released to
+  ippra.net. The status tracker is the private repo `ippra/deployments`.
