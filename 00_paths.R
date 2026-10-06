@@ -43,6 +43,11 @@ zone_county_reference <- file.path(reference_dir, "zone_county.csv")
 # boundary file of 16 April 2026.
 offices_reference <- file.path(reference_dir, "offices.csv")
 
+# Products in the FRW archive that are not Fire Warnings, each read and decided
+# by hand, with the reason. 02 drops them and stops on any other product whose
+# polygon and UGC line disagree.
+excluded_reference <- file.path(reference_dir, "excluded_warnings.csv")
+
 # NWS county warning area boundaries, an input to 04_map_offices.R only. 27 MB,
 # so not in the repository:
 # https://www.weather.gov/gis/CWABounds

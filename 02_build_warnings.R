@@ -75,6 +75,23 @@ products_data <- tibble(file = files) |>
     tz = str_to_upper(str_match(text, stamp_pattern)[, 2])
   )
 
+# Test messages and other products that are not Fire Warnings, each read and
+# listed by hand in reference/.
+excluded_data <- excluded_reference |>
+  read_csv(col_types = cols(.default = col_character()))
+
+not_in_archive <- setdiff(excluded_data$product_id, products_data$product_id)
+if (length(not_in_archive) > 0) {
+  message("Excluded products no longer in the archive: ",
+          paste(not_in_archive, collapse = ", "))
+}
+
+products_data <- products_data |>
+  anti_join(excluded_data, by = "product_id")
+
+message("Excluded: ", nrow(excluded_data), " products listed in ",
+        basename(excluded_reference))
+
 no_ugc_data <- products_data |>
   filter(is.na(ugc_block) | is.na(issue_utc))
 
@@ -330,7 +347,9 @@ misplaced_data <- warnings_data |>
 
 if (nrow(misplaced_data) > 0) {
   print(select(st_drop_geometry(misplaced_data), product_id, areas))
-  stop("Warnings above have a polygon outside every county they name.")
+  stop("Warnings above have a polygon outside every county they name. Read ",
+       "each; a product that is not a Fire Warning goes in ",
+       basename(excluded_reference), " with its reason.")
 }
 
 # Text -------------------------------------------------------------------------

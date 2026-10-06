@@ -94,7 +94,8 @@ pull that reaches its limit or comes back far smaller than the archive on
 disk, a warning from an office not in `reference/offices.csv`, a time zone not
 declared, a warning whose UGC line, expiry or polygon does not parse, a county
 or zone code that resolves to no county, a polygon outside every county its
-warning names, a message with nothing to summarise, and R or CSV files in the
+warning names (unless the product is listed as not a Fire Warning in
+`reference/`), a message with nothing to summarise, and R or CSV files in the
 published directory all halt the build. A failed run leaves the last good site
 in place.
 
@@ -134,6 +135,14 @@ combines two NWS files so old numbers still resolve, and because a reused
 number would silently move an old warning, each zone-coded warning is checked
 against its evidence: a polygon must overlap one of its counties, and a
 warning without one must name one in its text.
+
+**Not every product in the archive is a Fire Warning.** Local alerting
+systems relay through the same NWS product, and one sent a test ("DOUGCO
+ALERT TEST 260 PLEASE IGNORE") whose polygon sat in a different county from
+the one its UGC line named. The build's polygon check caught it. Such products
+are read and listed with their reason in `reference/excluded_warnings.csv`,
+and the build drops them; any other product whose polygon lies outside every
+county it names still stops the build until it is read.
 
 **Summaries and requesters are extracted by rule.** The summary is the first
 paragraph after the issue line, skipping a headline and the sentence saying a
